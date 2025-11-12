@@ -3,18 +3,109 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package view;
-
+import java.awt.HeadlessException;
+import java.awt.event.MouseEvent;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.io.File;
+import java.io.IOException;
+import model.agenda; 
+import java.text.SimpleDateFormat; 
+import java.util.Date; 
+import controller.AgendaController; 
+import java.text.ParseException;
 /**
  *
  * @author USER
  */
 public class agendaFrame extends javax.swing.JFrame {
-
+    // Deklarasi Controller dan variabel status
+    private final AgendaController controller;
+    private int selectedAgendaId = -1;
+    // Format tanggal yang digunakan untuk JDateChooser dan Model/Tabel
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    
     /**
      * Creates new form agendaFrame
      */
     public agendaFrame() {
         initComponents();
+        controller = new AgendaController();
+        inisialisasiTabel(); // Setup kolom tabel
+        tampilkanDataKeTabel();
+        
+        // Menambahkan listener klik untuk tabel secara manual
+        tblAgenda.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblAgendaMouseClicked(evt);
+            }
+
+            private void tblAgendaMouseClicked(MouseEvent evt) {
+                int selectedRow = tblAgenda.getSelectedRow();
+                if (selectedRow != -1) {
+                    try {
+                        // ID ada di kolom ke-5 (indeks 5) yang disembunyikan
+                        selectedAgendaId = (int) tblAgenda.getModel().getValueAt(selectedRow, 5); 
+
+                        // Muat data ke field input
+                        txtJudul.setText((String) tblAgenda.getModel().getValueAt(selectedRow, 0));
+
+                        // Muat Tanggal (konversi dari String di tabel ke objek Date untuk JDateChooser)
+                        String tanggalStr = (String) tblAgenda.getModel().getValueAt(selectedRow, 1);
+                        // Catatan: Anda perlu memastikan dateFormat sudah dideklarasikan di level class
+                        jDateChooser1.setDate(dateFormat.parse(tanggalStr));
+
+                        // Muat Waktu, Kategori, Deskripsi
+                        txtWaktu.setText((String) tblAgenda.getModel().getValueAt(selectedRow, 2));
+                        cbxKategori.setSelectedItem((String) tblAgenda.getModel().getValueAt(selectedRow, 3));
+                        txtDeskripsi.setText((String) tblAgenda.getModel().getValueAt(selectedRow, 4));
+
+                    } catch (ParseException e) {
+                         // Menggunakan agendaFrame.this untuk merujuk ke frame dari dalam inner class
+                         JOptionPane.showMessageDialog(agendaFrame.this, "Gagal memuat data agenda: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+    }
+    
+    private void inisialisasiTabel() {
+        DefaultTableModel model = (DefaultTableModel) tblAgenda.getModel();
+        // 5 kolom data: Judul, Tanggal, Waktu, Kategori, Deskripsi, dan 1 kolom ID tersembunyi
+        model.setColumnIdentifiers(new Object[]{"Judul", "Tanggal", "Waktu", "Kategori", "Deskripsi", "ID"});
+        
+        // Sembunyikan kolom ID (indeks 5)
+        tblAgenda.getColumnModel().getColumn(5).setMinWidth(0);
+        tblAgenda.getColumnModel().getColumn(5).setMaxWidth(0);
+        tblAgenda.getColumnModel().getColumn(5).setPreferredWidth(0);
+    }
+    
+    // Method untuk menampilkan/me-refresh data di JTable
+    public final void tampilkanDataKeTabel() {
+        DefaultTableModel model = (DefaultTableModel) tblAgenda.getModel();
+        model.setRowCount(0); // Hapus semua baris yang ada
+        
+        for (agenda a : controller.getSemuaAgenda()) {
+            model.addRow(new Object[]{
+                a.getJudul(), 
+                a.getTanggal(), 
+                a.getWaktu(),
+                a.getKategori(), // Kategori di indeks 3
+                a.getDeskripsi(), 
+                a.getId() // ID di indeks 5
+            });
+        }
+    }
+    
+    // Method untuk mengosongkan field input
+    private void clearFields() {
+        txtJudul.setText("");
+        jDateChooser1.setDate(null); // Membersihkan JDateChooser
+        txtWaktu.setText("");
+        cbxKategori.setSelectedIndex(0); // Reset ComboBox
+        txtDeskripsi.setText("");
+        selectedAgendaId = -1;
     }
 
     /**
@@ -33,31 +124,32 @@ public class agendaFrame extends javax.swing.JFrame {
         lblWaktu = new javax.swing.JLabel();
         lblKategori = new javax.swing.JLabel();
         lblDeskripsi = new javax.swing.JLabel();
+        txtJudul = new javax.swing.JTextField();
+        jDateChooser1 = new com.toedter.calendar.JDateChooser();
+        txtWaktu = new javax.swing.JTextField();
+        cbxKategori = new javax.swing.JComboBox<>();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        txtDeskripsi = new javax.swing.JTextArea();
         btnTambah = new javax.swing.JButton();
         btnEdit = new javax.swing.JButton();
         btnHapus = new javax.swing.JButton();
         btnClear = new javax.swing.JButton();
-        cbxKategori = new javax.swing.JComboBox<>();
-        txtJudul = new javax.swing.JTextField();
-        jDateChooser1 = new com.toedter.calendar.JDateChooser();
-        txtWaktu = new javax.swing.JTextField();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        txtDeskripsi = new javax.swing.JTextArea();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblAgenda = new javax.swing.JTable();
+        jPanel4 = new javax.swing.JPanel();
         lblCariAgenda = new javax.swing.JLabel();
         txtCariAgenda = new javax.swing.JTextField();
         btnCari = new javax.swing.JButton();
-        btnImport = new javax.swing.JButton();
         btnExport = new javax.swing.JButton();
+        btnImport = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jPanel1.setBackground(new java.awt.Color(255, 153, 102));
+        jPanel1.setBackground(new java.awt.Color(191, 9, 47));
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "APLIKASI AGENDA PRIBADI", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 18), new java.awt.Color(255, 255, 255))); // NOI18N
 
-        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel2.setBackground(new java.awt.Color(248, 248, 248));
 
         lblJudul.setText("Judul");
 
@@ -69,19 +161,47 @@ public class agendaFrame extends javax.swing.JFrame {
 
         lblDeskripsi.setText("Deskripsi");
 
-        btnTambah.setText("Tambah");
-
-        btnEdit.setText("Edit");
-
-        btnHapus.setText("Hapus");
-
-        btnClear.setText("Clear");
-
-        cbxKategori.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbxKategori.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Pekerjaan", "Kuliah", "Pribadi", "Keluarga", "Lainnya" }));
 
         txtDeskripsi.setColumns(20);
         txtDeskripsi.setRows(5);
         jScrollPane1.setViewportView(txtDeskripsi);
+
+        btnTambah.setBackground(new java.awt.Color(152, 215, 161));
+        btnTambah.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnTambah.setText("Tambah");
+        btnTambah.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTambahActionPerformed(evt);
+            }
+        });
+
+        btnEdit.setBackground(new java.awt.Color(144, 188, 255));
+        btnEdit.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnEdit.setText("Edit");
+        btnEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditActionPerformed(evt);
+            }
+        });
+
+        btnHapus.setBackground(new java.awt.Color(255, 170, 170));
+        btnHapus.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnHapus.setText("Hapus");
+        btnHapus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHapusActionPerformed(evt);
+            }
+        });
+
+        btnClear.setBackground(new java.awt.Color(190, 190, 190));
+        btnClear.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnClear.setText("Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -95,8 +215,14 @@ public class agendaFrame extends javax.swing.JFrame {
                         .addGap(45, 45, 45)
                         .addComponent(txtJudul))
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(lblTanggal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(334, 334, 334))
+                        .addComponent(btnTambah)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnEdit)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnHapus)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnClear)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -105,22 +231,14 @@ public class agendaFrame extends javax.swing.JFrame {
                             .addComponent(lblDeskripsi))
                         .addGap(45, 45, 45)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1)
-                            .addComponent(cbxKategori, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addComponent(jDateChooser1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(txtWaktu, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(0, 0, Short.MAX_VALUE))))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(btnTambah)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnEdit)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnHapus)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnClear)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(cbxKategori, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1)))
+                    .addComponent(lblTanggal, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -155,6 +273,10 @@ public class agendaFrame extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
+        jPanel3.setBackground(new java.awt.Color(214, 244, 237));
+
+        tblAgenda.setBackground(new java.awt.Color(248, 248, 248));
+        tblAgenda.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         tblAgenda.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -168,67 +290,106 @@ public class agendaFrame extends javax.swing.JFrame {
         ));
         jScrollPane2.setViewportView(tblAgenda);
 
-        lblCariAgenda.setText("Cari Agenda:");
-
-        btnCari.setText("Cari");
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(lblCariAgenda, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtCariAgenda, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
-                        .addComponent(btnCari, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(19, 19, 19)))
+                .addComponent(jScrollPane2)
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+            .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblCariAgenda)
-                    .addComponent(txtCariAgenda, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnCari, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE))
-                .addGap(11, 11, 11)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        btnImport.setText("Import");
+        jPanel4.setBackground(new java.awt.Color(214, 244, 237));
 
+        lblCariAgenda.setText("Cari Agenda:");
+
+        btnCari.setText("Cari");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(lblCariAgenda, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtCariAgenda, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 98, Short.MAX_VALUE)
+                .addComponent(btnCari, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(15, 15, 15))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                        .addComponent(btnCari, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
+                        .addContainerGap(1, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(lblCariAgenda, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtCariAgenda))
+                        .addContainerGap())))
+        );
+
+        btnExport.setBackground(new java.awt.Color(214, 244, 237));
+        btnExport.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
+
+        btnImport.setBackground(new java.awt.Color(249, 248, 246));
+        btnImport.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnImport.setText("Import");
+        btnImport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnImportActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnImport)
-                .addGap(18, 18, 18)
-                .addComponent(btnExport)
-                .addGap(10, 10, 10))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnExport)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnImport))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnImport, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnExport, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(btnExport, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnImport, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -239,13 +400,124 @@ public class agendaFrame extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 6, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        clearFields();    // TODO add your handling code here:
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahActionPerformed
+        try {
+            String judul = txtJudul.getText();
+            
+            // Ambil Tanggal dari JDateChooser dan format ke String (YYYY-MM-DD)
+            Date date = jDateChooser1.getDate();
+            if (date == null) throw new IllegalArgumentException("Tanggal harus diisi.");
+            String tanggal = dateFormat.format(date); 
+            
+            String waktu = txtWaktu.getText(); 
+            String kategori = (String) cbxKategori.getSelectedItem();
+            String deskripsi = txtDeskripsi.getText();
+            
+            // Panggil Controller dengan 5 parameter data
+            controller.tambahAgenda(judul, tanggal, waktu, kategori, deskripsi);
+            
+            JOptionPane.showMessageDialog(this, "Agenda berhasil ditambahkan!");
+            tampilkanDataKeTabel();
+            clearFields();
+            
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (HeadlessException e) {
+             JOptionPane.showMessageDialog(this, "Kesalahan saat menambah data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }     // TODO add your handling code here:
+    }//GEN-LAST:event_btnTambahActionPerformed
+
+    private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
+        if (selectedAgendaId != -1) {
+            try {
+                String newJudul = txtJudul.getText();
+                
+                Date date = jDateChooser1.getDate();
+                if (date == null) throw new IllegalArgumentException("Tanggal harus diisi.");
+                String newTanggal = dateFormat.format(date);
+                
+                String newWaktu = txtWaktu.getText(); 
+                String newKategori = (String) cbxKategori.getSelectedItem(); 
+                String newDeskripsi = txtDeskripsi.getText();
+
+                // Panggil Controller dengan ID dan 5 parameter data baru
+                if (controller.editAgenda(selectedAgendaId, newJudul, newTanggal, newWaktu, newKategori, newDeskripsi)) {
+                    JOptionPane.showMessageDialog(this, "Agenda berhasil diubah.");
+                    tampilkanDataKeTabel();
+                    clearFields();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Gagal mengubah. Agenda tidak ditemukan.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (IllegalArgumentException e) {
+                 JOptionPane.showMessageDialog(this, e.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception e) {
+                 JOptionPane.showMessageDialog(this, "Kesalahan saat mengubah data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Pilih agenda yang akan diubah dari daftar.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        }       // TODO add your handling code here:
+    }//GEN-LAST:event_btnEditActionPerformed
+
+    private void btnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusActionPerformed
+        if (selectedAgendaId != -1) {
+            int dialogResult = JOptionPane.showConfirmDialog(this, "Yakin ingin menghapus agenda ini?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
+            if (dialogResult == JOptionPane.YES_OPTION) {
+                if (controller.hapusAgenda(selectedAgendaId)) {
+                    JOptionPane.showMessageDialog(this, "Agenda berhasil dihapus.");
+                    tampilkanDataKeTabel();
+                    clearFields();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Gagal menghapus.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Pilih agenda yang akan dihapus dari daftar.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        }      // TODO add your handling code here:
+    }//GEN-LAST:event_btnHapusActionPerformed
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Simpan Data Agenda ke CSV");
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try {
+                String filePath = file.getAbsolutePath().endsWith(".csv") ? file.getAbsolutePath() : file.getAbsolutePath() + ".csv";
+                controller.exportToCSV(filePath);
+                JOptionPane.showMessageDialog(this, "Data berhasil diekspor ke: " + filePath);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Gagal ekspor data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void btnImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImportActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Impor Data Agenda dari CSV");
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try {
+                controller.importFromCSV(file.getAbsolutePath());
+                tampilkanDataKeTabel();
+                JOptionPane.showMessageDialog(this, "Data berhasil diimpor!");
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Gagal impor data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }       // TODO add your handling code here:
+    }//GEN-LAST:event_btnImportActionPerformed
+
+/**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
@@ -254,7 +526,30 @@ public class agendaFrame extends javax.swing.JFrame {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-       
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(agendaFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(agendaFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(agendaFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(agendaFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new agendaFrame().setVisible(true);
+            }
+        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -270,6 +565,7 @@ public class agendaFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblCariAgenda;
@@ -284,4 +580,5 @@ public class agendaFrame extends javax.swing.JFrame {
     private javax.swing.JTextField txtJudul;
     private javax.swing.JTextField txtWaktu;
     // End of variables declaration//GEN-END:variables
+
 }
