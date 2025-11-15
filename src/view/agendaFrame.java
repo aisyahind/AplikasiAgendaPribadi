@@ -277,7 +277,7 @@ public class agendaFrame extends javax.swing.JFrame {
 
         jPanel3.setBackground(new java.awt.Color(214, 244, 237));
 
-        tblAgenda.setBackground(new java.awt.Color(248, 248, 248));
+        tblAgenda.setBackground(new java.awt.Color(226, 226, 226));
         tblAgenda.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         tblAgenda.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -571,9 +571,12 @@ public class agendaFrame extends javax.swing.JFrame {
             // 2. Hapus tampilan tabel
             DefaultTableModel model = (DefaultTableModel) tblAgenda.getModel();
             model.setRowCount(0);
+            
+            // 3. Tambahkan ini untuk membersihkan field input
+            clearFields(); 
 
             JOptionPane.showMessageDialog(this, "Semua riwayat berhasil dihapus!");
-        }              // TODO add your handling code here:
+        }          // TODO add your handling code here:
     }//GEN-LAST:event_btnRiwayatActionPerformed
 
 /**
