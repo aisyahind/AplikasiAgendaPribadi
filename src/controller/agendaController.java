@@ -123,4 +123,21 @@ public class AgendaController {
         // Atur ulang ID agar penambahan data baru selanjutnya tidak menimpa ID lama
         agenda.setNextId(maxId + 1); 
     }
+
+public List<agenda> cariAgenda(String keyword) {
+    List<agenda> hasil = new ArrayList<>();
+
+    if (keyword == null || keyword.trim().isEmpty()) {
+        return hasil;
+    }
+
+    keyword = keyword.toLowerCase();
+
+    for (agenda a : daftarAgenda) {
+        if (a.getJudul().toLowerCase().contains(keyword)) {
+            hasil.add(a);
+        }
+    }
+    return hasil;
+}
 }

@@ -24,6 +24,7 @@ public class agendaFrame extends javax.swing.JFrame {
     private int selectedAgendaId = -1;
     // Format tanggal yang digunakan untuk JDateChooser dan Model/Tabel
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private Object tableAgenda;
     
     /**
      * Creates new form agendaFrame
@@ -141,6 +142,7 @@ public class agendaFrame extends javax.swing.JFrame {
         lblCariAgenda = new javax.swing.JLabel();
         txtCariAgenda = new javax.swing.JTextField();
         btnCari = new javax.swing.JButton();
+        btnRiwayat = new javax.swing.JButton();
         btnExport = new javax.swing.JButton();
         btnImport = new javax.swing.JButton();
 
@@ -312,6 +314,11 @@ public class agendaFrame extends javax.swing.JFrame {
         lblCariAgenda.setText("Cari Agenda:");
 
         btnCari.setText("Cari");
+        btnCari.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCariActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -322,7 +329,7 @@ public class agendaFrame extends javax.swing.JFrame {
                 .addComponent(lblCariAgenda, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtCariAgenda, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 98, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 86, Short.MAX_VALUE)
                 .addComponent(btnCari, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(15, 15, 15))
         );
@@ -340,6 +347,15 @@ public class agendaFrame extends javax.swing.JFrame {
                             .addComponent(txtCariAgenda))
                         .addContainerGap())))
         );
+
+        btnRiwayat.setBackground(new java.awt.Color(214, 229, 139));
+        btnRiwayat.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnRiwayat.setText("Hapus Riwayat");
+        btnRiwayat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRiwayatActionPerformed(evt);
+            }
+        });
 
         btnExport.setBackground(new java.awt.Color(214, 244, 237));
         btnExport.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
@@ -368,12 +384,13 @@ public class agendaFrame extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnRiwayat, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnExport)
                         .addGap(18, 18, 18)
-                        .addComponent(btnImport))
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(btnImport)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -385,11 +402,13 @@ public class agendaFrame extends javax.swing.JFrame {
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnExport, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnImport, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(12, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnExport, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnImport, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnRiwayat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -517,6 +536,46 @@ public class agendaFrame extends javax.swing.JFrame {
         }       // TODO add your handling code here:
     }//GEN-LAST:event_btnImportActionPerformed
 
+    private void btnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCariActionPerformed
+        String keyword = txtCariAgenda.getText().trim();
+
+    DefaultTableModel model = (DefaultTableModel) tblAgenda.getModel();
+    model.setRowCount(0); // hapus isi tabel dulu
+
+    // Ambil hasil pencarian dari controller
+    for (agenda a : controller.cariAgenda(keyword)) {
+        model.addRow(new Object[]{
+            a.getJudul(),
+            a.getTanggal(),
+            a.getWaktu(),
+            a.getKategori(),
+            a.getDeskripsi(),
+            a.getId()
+        });
+    }        // TODO add your handling code here:
+    }//GEN-LAST:event_btnCariActionPerformed
+
+    private void btnRiwayatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRiwayatActionPerformed
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Apakah Anda yakin ingin menghapus seluruh riwayat agenda?",
+                "Konfirmasi",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+
+            // 1. Hapus di Controller (List)
+            controller.getSemuaAgenda().clear();
+
+            // 2. Hapus tampilan tabel
+            DefaultTableModel model = (DefaultTableModel) tblAgenda.getModel();
+            model.setRowCount(0);
+
+            JOptionPane.showMessageDialog(this, "Semua riwayat berhasil dihapus!");
+        }              // TODO add your handling code here:
+    }//GEN-LAST:event_btnRiwayatActionPerformed
+
 /**
      * @param args the command line arguments
      */
@@ -559,6 +618,7 @@ public class agendaFrame extends javax.swing.JFrame {
     private javax.swing.JButton btnExport;
     private javax.swing.JButton btnHapus;
     private javax.swing.JButton btnImport;
+    private javax.swing.JButton btnRiwayat;
     private javax.swing.JButton btnTambah;
     private javax.swing.JComboBox<String> cbxKategori;
     private com.toedter.calendar.JDateChooser jDateChooser1;
