@@ -16,15 +16,21 @@ public class agenda {
     // Atribut (Properties)
     private final int id; 
     private String judul;
-    private String tanggal; // Disimpan sebagai String (YYYY-MM-DD)
+    private String tanggal;
     private String waktu;
     private String kategori; 
     private String deskripsi;
 
-    // --- CONSTRUCTOR ---
+    // CONSTRUCTOR 
     /**
-     * Constructor untuk membuat objek agenda baru (digunakan saat Tambah/Import).
+     * 
+     * @param judul
+     * @param tanggal
+     * @param waktu
+     * @param kategori
+     * @param deskripsi
      */
+    // Constructor: untuk membuat objek Agenda baru dan mengisi semua data agenda      
     public agenda(String judul, String tanggal, String waktu, String kategori, String deskripsi) {
         this.id = nextId++; 
         this.judul = judul;
@@ -34,7 +40,8 @@ public class agenda {
         this.deskripsi = deskripsi;
     }
 
-    // --- GETTER (Accessor Methods) ---
+    // GETTER
+    // Mengambil nilai ID agenda
     public int getId() { 
         return id; 
     }
@@ -59,7 +66,8 @@ public class agenda {
         return deskripsi; 
     }
 
-    // --- SETTER (Mutator Methods) ---
+    // SETTER
+    // Mengganti/mengatur judul agenda
     public void setJudul(String judul) { 
         this.judul = judul; 
     }
@@ -80,8 +88,8 @@ public class agenda {
         this.deskripsi = deskripsi; 
     }
 
-    // Method statis untuk mengatur ID setelah operasi Import
-    public static void setNextId(int nextId) {
+    // Method statis untuk mengatur ID setelah operasi Import data
+    public static void setNextId(int nextId) { 
         agenda.nextId = nextId;
     }
 }

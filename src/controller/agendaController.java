@@ -12,15 +12,18 @@ import java.io.*;
  *
  * @author USER
  */
+// Kelas Controller: Menangani Logika Bisnis (CRUD, Export, Import, Cari).
 public class AgendaController {
     
     private final List<agenda> daftarAgenda;
 
+    // Constructor: Inisialisasi list penyimpanan data agenda.
     public AgendaController() {
         daftarAgenda = new ArrayList<>();
     }
     
-    // --- C (Create/Tambah) ---
+    // C (Create/Tambah)
+    // Tambah agenda baru ke list. Lakukan validasi input wajib.
     public void tambahAgenda(String judul, String tanggal, String waktu, String kategori, String deskripsi) {
         if (judul.isEmpty() || tanggal.isEmpty() || waktu.isEmpty() || kategori.isEmpty()) {
             throw new IllegalArgumentException("Judul, Tanggal, Waktu, dan Kategori tidak boleh kosong.");
@@ -29,11 +32,13 @@ public class AgendaController {
         daftarAgenda.add(new agenda(judul, tanggal, waktu, kategori, deskripsi)); 
     }
     
-    // --- R (Read/Ambil) ---
+    // R (Read/Ambil)
+    // Ambil semua daftar agenda
     public List<agenda> getSemuaAgenda() {
         return daftarAgenda;
     }
     
+    // Cari agenda berdasarkan ID unik
     public agenda getAgendaById(int id) {
         for (agenda a : daftarAgenda) {
             if (a.getId() == id) {
@@ -43,7 +48,8 @@ public class AgendaController {
         return null;
     }
 
-    // --- U (Update/Edit) ---
+    // (Update/Edit)
+    // Edit data agenda berdasarkan ID. Lakukan validasi input.
     public boolean editAgenda(int idToEdit, String newJudul, String newTanggal, String newWaktu, String newKategori, String newDeskripsi) {
         agenda agendaToEdit = getAgendaById(idToEdit);
         
@@ -62,19 +68,21 @@ public class AgendaController {
         return false;
     }
 
-    // --- D (Delete/Hapus) ---
+    // (Delete/Hapus)
+    // Hapus agenda dari list berdasarkan ID. 
     public boolean hapusAgenda(int idToDelete) {
         return daftarAgenda.removeIf(a -> a.getId() == idToDelete);
     }
     
-    // --- Fitur Tantangan: Export ke CSV ---
+    // Fungsionalitas ekstra
+    // Export semua data agenda ke file CSV.a
     public void exportToCSV(String filePath) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            // Header
+            // Tulis Header
             writer.write("ID,Judul,Tanggal,Waktu,Kategori,Deskripsi\n");
             
             for (agenda a : daftarAgenda) {
-                // Formatting data ke CSV, memastikan koma dan kutip ditangani
+                // Tulis data, menangani kutip ganda untuk CSV
                 String line = String.format("%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", 
                                             a.getId(), 
                                             a.getJudul().replace("\"", "\"\""), 
@@ -87,7 +95,7 @@ public class AgendaController {
         }
     }
     
-    // --- Fitur Tantangan: Import dari CSV ---
+    // Import data dari file CSV dan perbarui list.
     public void importFromCSV(String filePath) throws IOException {
         daftarAgenda.clear(); // Hapus data lama
         int maxId = 0;
@@ -120,10 +128,12 @@ public class AgendaController {
                 }
             }
         }
-        // Atur ulang ID agar penambahan data baru selanjutnya tidak menimpa ID lama
+        
+        // Reset ID statis (nextId) agar penambahan data baru tidak bentrok.
         agenda.setNextId(maxId + 1); 
     }
 
+    // Cari agenda berdasarkan kata kunci pada Judul.
 public List<agenda> cariAgenda(String keyword) {
     List<agenda> hasil = new ArrayList<>();
 
@@ -140,4 +150,8 @@ public List<agenda> cariAgenda(String keyword) {
     }
     return hasil;
 }
+
+    public Iterable<agenda> cariAgenda(Object keyword) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }

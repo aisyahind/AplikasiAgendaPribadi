@@ -18,6 +18,7 @@ import java.text.ParseException;
  *
  * @author USER
  */
+// Kelas utama (View) untuk antarmuka pengguna Aplikasi Agenda.
 public class agendaFrame extends javax.swing.JFrame {
     // Deklarasi Controller dan variabel status
     private final AgendaController controller;
@@ -25,9 +26,13 @@ public class agendaFrame extends javax.swing.JFrame {
     // Format tanggal yang digunakan untuk JDateChooser dan Model/Tabel
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private Object tableAgenda;
+    private Object keyword;
     
-    /**
-     * Creates new form agendaFrame
+/**
+     * Konstruktor untuk membuat form agendaFrame baru.
+     * Melakukan inisialisasi komponen GUI, menginisialisasi Controller, 
+     * mengatur kolom tabel, menampilkan data awal, dan menambahkan 
+     * MouseListener untuk penanganan klik pada baris tabel.
      */
     public agendaFrame() {
         initComponents();
@@ -35,29 +40,24 @@ public class agendaFrame extends javax.swing.JFrame {
         inisialisasiTabel(); // Setup kolom tabel
         tampilkanDataKeTabel();
         
-        // Menambahkan listener klik untuk tabel secara manual
+        // Menambahkan MouseListener untuk memuat data ke field saat baris tabel diklik.
         tblAgenda.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tblAgendaMouseClicked(evt);
             }
 
+            // Method yang dipanggil saat baris tabel diklik. Memuat data baris ke field input.
             private void tblAgendaMouseClicked(MouseEvent evt) {
                 int selectedRow = tblAgenda.getSelectedRow();
                 if (selectedRow != -1) {
                     try {
-                        // ID ada di kolom ke-5 (indeks 5) yang disembunyikan
+                        // Logika untuk mengambil ID tersembunyi dan data lainnya, lalu mengisikannya ke field.
                         selectedAgendaId = (int) tblAgenda.getModel().getValueAt(selectedRow, 5); 
-
-                        // Muat data ke field input
                         txtJudul.setText((String) tblAgenda.getModel().getValueAt(selectedRow, 0));
-
-                        // Muat Tanggal (konversi dari String di tabel ke objek Date untuk JDateChooser)
                         String tanggalStr = (String) tblAgenda.getModel().getValueAt(selectedRow, 1);
-                        // Catatan: Anda perlu memastikan dateFormat sudah dideklarasikan di level class
+                        // Catatan: perlu memastikan dateFormat sudah dideklarasikan di level class
                         jDateChooser1.setDate(dateFormat.parse(tanggalStr));
-
-                        // Muat Waktu, Kategori, Deskripsi
                         txtWaktu.setText((String) tblAgenda.getModel().getValueAt(selectedRow, 2));
                         cbxKategori.setSelectedItem((String) tblAgenda.getModel().getValueAt(selectedRow, 3));
                         txtDeskripsi.setText((String) tblAgenda.getModel().getValueAt(selectedRow, 4));
@@ -71,6 +71,10 @@ public class agendaFrame extends javax.swing.JFrame {
         });
     }
     
+    /**
+     * Mengatur model tabel dan menentukan identitas kolom.
+     * Secara spesifik, menyembunyikan kolom "ID" (indeks 5) dari tampilan pengguna.
+     */
     private void inisialisasiTabel() {
         DefaultTableModel model = (DefaultTableModel) tblAgenda.getModel();
         // 5 kolom data: Judul, Tanggal, Waktu, Kategori, Deskripsi, dan 1 kolom ID tersembunyi
@@ -82,7 +86,11 @@ public class agendaFrame extends javax.swing.JFrame {
         tblAgenda.getColumnModel().getColumn(5).setPreferredWidth(0);
     }
     
-    // Method untuk menampilkan/me-refresh data di JTable
+    /**
+     * Mengambil semua data agenda dari Controller dan menampilkannya 
+     * ke dalam JTable (tblAgenda).
+     * Metode ini harus dipanggil setiap kali data diubah (tambah, edit, hapus).
+     */
     public final void tampilkanDataKeTabel() {
         DefaultTableModel model = (DefaultTableModel) tblAgenda.getModel();
         model.setRowCount(0); // Hapus semua baris yang ada
@@ -539,6 +547,13 @@ public class agendaFrame extends javax.swing.JFrame {
     private void btnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCariActionPerformed
         String keyword = txtCariAgenda.getText().trim();
 
+    // Perbaikan: Mengganti .isEmpty() dengan .length() == 0
+    if (keyword.length() == 0) { 
+        // Jika field pencarian kosong (setelah di-trim), kembalikan tampilan ke data awal
+        tampilkanDataKeTabel();
+        return; // Hentikan eksekusi pencarian
+    }
+
     DefaultTableModel model = (DefaultTableModel) tblAgenda.getModel();
     model.setRowCount(0); // hapus isi tabel dulu
 
@@ -552,6 +567,7 @@ public class agendaFrame extends javax.swing.JFrame {
             a.getDeskripsi(),
             a.getId()
         });
+
     }        // TODO add your handling code here:
     }//GEN-LAST:event_btnCariActionPerformed
 
